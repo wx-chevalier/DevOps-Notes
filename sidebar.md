@@ -3,17 +3,19 @@
       
     - [开源对比](/分布式追踪/开源对比.md)
     - [系统设计](/分布式追踪/系统设计.md)
-  - 变更与发布
-    - [多策略部署](/变更与发布/多策略部署.md)
-    - [风险评估](/变更与发布/风险评估.md)
-  - [持续集成](/持续集成/README.md)
-    - [CI](/持续集成/CI.md)
-    - [Jenkins](/持续集成/Jenkins/README.md)
+  - [持续集成与交付](/持续集成与交付/README.md)
+    - [CI](/持续集成与交付/CI.md)
+    - [Jenkins](/持续集成与交付/Jenkins/README.md)
       
-    - [Spinnaker](/持续集成/Spinnaker/README.md)
-      - [部署配置](/持续集成/Spinnaker/部署配置.md)
-    - [Tekton](/持续集成/Tekton/README.md)
+    - [Spinnaker](/持续集成与交付/Spinnaker/README.md)
+      - [部署配置](/持续集成与交付/Spinnaker/部署配置.md)
+    - [Tekton](/持续集成与交付/Tekton/README.md)
       
+    - [ToB 交付](/持续集成与交付/ToB%20交付/README.md)
+      
+    - 变更与发布
+      - [多策略部署](/持续集成与交付/变更与发布/多策略部署.md)
+      - [风险评估](/持续集成与交付/变更与发布/风险评估.md)
   - [日志聚合](/日志聚合/README.md)
     - [ELK](/日志聚合/ELK/README.md)
       
