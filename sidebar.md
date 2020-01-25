@@ -4,7 +4,8 @@
     - [开源对比](/分布式追踪/开源对比.md)
     - [系统设计](/分布式追踪/系统设计.md)
   - [持续集成与交付](/持续集成与交付/README.md)
-    - [CI](/持续集成与交付/CI.md)
+    - CI
+      - [CI](/持续集成与交付/CI/CI.md)
     - [Jenkins](/持续集成与交付/Jenkins/README.md)
       
     - [Spinnaker](/持续集成与交付/Spinnaker/README.md)
