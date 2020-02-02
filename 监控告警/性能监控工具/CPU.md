@@ -30,7 +30,7 @@ $ ps axo %mem,pid,euser,cmd | sort -nr | head -10
 $ ps -aeo pcpu,user,pid,cmd | sort -nr | head -10
 
 # 显示系统整体的 CPU利用率和闲置率
-$ grep "cpu " /proc/stat | awk -F ' ' '{total = $2 + $3 + $4 + $5} END {print "idle \t used\n" $5*100/total "% " $2*100/total "%"}'  ​​​​
+$ grep "cpu " /proc/stat | awk -F ' ' '{total = $2 + $3 + $4 + $5} END {print "idle \t used\n" $5*100/total "% " $2*100/total "%"}'
 ```
 
 ## CPU 利用率高 & 平均负载高
