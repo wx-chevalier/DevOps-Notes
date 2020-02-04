@@ -1,5 +1,3 @@
-
-
 # 持续集成
 
 Here’s an excerpt from [Thoughtworks](https://www.thoughtworks.com/continuous-integration) on what a typical continuous integration flow looks like:

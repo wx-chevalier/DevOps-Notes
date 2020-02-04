@@ -1,5 +1,3 @@
-
-
 # Test Double
 
 ![](https://res.cloudinary.com/dhttas9u5/image/upload/test-doubles_bmkusn.jpg)
@@ -62,13 +60,16 @@ public class OrderEasyTester extends TestCase {
 
 ```java
 public interface MailService {
-  public void send (Message msg);
+  public void send(Message msg);
 }
+
 public class MailServiceStub implements MailService {
   private List<Message> messages = new ArrayList<Message>();
-  public void send (Message msg) {
+
+  public void send(Message msg) {
     messages.add(msg);
   }
+
   public int numberSent() {
     return messages.size();
   }
