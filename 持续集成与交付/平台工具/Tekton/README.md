@@ -8,7 +8,7 @@ Tekton 是一款 Kubernetes 原生的应用发布框架，主要用来构建 CI/
 
 - 灵活扩展：基本上所有工具都不能够满足我们复杂多变的业务需求。这些工具架构本身需要提供足够灵活的扩展性，来快速定制实现所需功能。
 
-举个例子：Argo Rollout 本身的应用发布，是跟 Kubernetes 的 Workload （比如 Deployment ）耦合在一起的。这就不是一个很具备扩展性的做法。最简单的例子：对于复杂有状态应用来说，大多都是用 Operator 或者 OpenKruise 管理的，这时候 Argo Rollout 该怎么办呢？
+举个例子：Argo Rollout 本身的应用发布，是跟 Kubernetes 的 Workload（比如 Deployment）耦合在一起的。这就不是一个很具备扩展性的做法。最简单的例子：对于复杂有状态应用来说，大多都是用 Operator 或者 OpenKruise 管理的，这时候 Argo Rollout 该怎么办呢？
 
 - 轻量级：工具本身不能做得“太重”，即不能有太多的组件或太多的概念。小而轻的项目初期易上手、中期易交付、后期易维护。
 
