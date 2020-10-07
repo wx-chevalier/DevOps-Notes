@@ -51,7 +51,7 @@ Spinnaker 主要包含两大块内容，集群管理和部署管理。
 - **Echo**：是通知系统组件，发送邮件等信息。
 - **Front50**：是存储管理组件，需要配置 Redis、Cassandra 等组件使用。
 - **Cloud driver** 是它用来适配不同的云平台的组件，比如 Kubernetes，Google、AWS EC2、Microsoft Azure 等。
-- **Fiat** 是鉴权的组件，配置权限管理，支持 OAuth、SAML、LDAP、GitHub teams、Azure groups、 Google Groups 等。
+- **Fiat** 是鉴权的组件，配置权限管理，支持 OAuth、SAML、LDAP、GitHub teams、Azure groups、Google Groups 等。
 
 ![组件间数据交互](https://i.postimg.cc/mZ1Fkd2f/image.png)
 
