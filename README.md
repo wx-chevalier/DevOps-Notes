@@ -16,7 +16,7 @@
   <p align="center">
     软件开发与部署
     <br />
-    <a href="https://github.com/wx-chevalier/DevOps-Series"><strong>在线阅读</strong></a>
+    <a href="https://github.com/wx-chevalier/DevOps-Series"><strong>在线阅读 >> </strong></a>
     <br />
     <br />
     <a href="https://github.com/wx-chevalier/DevOps-Series">速览手册</a>
