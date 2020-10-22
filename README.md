@@ -14,7 +14,7 @@
   <h3 align="center">DevOps Series</h3>
 
   <p align="center">
-    软件开发与部署
+    软件开发后：测试、部署、监控、运维
     <br />
     <a href="https://github.com/wx-chevalier/DevOps-Series"><strong>在线阅读 >> </strong></a>
     <br />
