@@ -40,6 +40,11 @@
       
     - [混沌工程](/测试/混沌工程/README.md)
       
+    - [端到端测试](/测试/端到端测试/README.md)
+      - [Cypress](/测试/端到端测试/Cypress.md)
+      - [Nightwatch](/测试/端到端测试/Nightwatch.md)
+      - [TestCafe](/测试/端到端测试/TestCafe.md)
+      - [Watir](/测试/端到端测试/Watir.md)
   - [监控告警](/监控告警/README.md)
     - [APM](/监控告警/APM/README.md)
       
