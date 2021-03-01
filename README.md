@@ -57,7 +57,7 @@ DevOps 是一种公司文化的变迁，它代表了开发、运维和测试等�
 
 ![DevOps 全回环](https://s3.ax1x.com/2020/12/22/rrB2NQ.png)
 
-# Nav | 导读
+# Nav | 关联导航
 
 ![思维脑图](https://i.postimg.cc/52VkSTkK/DevOPS.png)
 
