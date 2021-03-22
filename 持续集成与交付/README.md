@@ -1,5 +1,5 @@
 # 持续集成
 
-# TBD
+# Links
 
 - https://www.ibm.com/developerworks/cn/rational/continuous-integration-agile-development/

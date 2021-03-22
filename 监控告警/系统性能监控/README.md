@@ -18,7 +18,7 @@
 
 > 本部分仅列举出常用的命令，具体命令的使用请参考 [Linux 命令实践](https://github.com/wx-chevalier/Linux-Series)。
 
-# TBD
+# Links
 
 - 参考[用十条命令在一分钟内检查 Linux 服务器性能](http://www.infoq.com/cn/news/2015/12/linux-performance)
 
