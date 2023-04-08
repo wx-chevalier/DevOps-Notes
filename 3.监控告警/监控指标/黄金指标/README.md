@@ -8,7 +8,7 @@
 
 Four Golden Signals 是 Google 针对大量分布式监控的经验总结，4 个黄金指标可以在服务级别帮助衡量终端用户体验、服务中断、业务影响等层面的问题。观察那些指标，按照《SRE：Google 运维解密》中描述的， 监控的四个黄金指标如后： 延迟、流量、错误、饱和度。
 
-![黄金指标示意](https://ngte-superbed.oss-cn-beijing.aliyuncs.com/superbed/2021/07/22/60f985f25132923bf80a49cf.jpg)
+![黄金指标示意](https://assets.ng-tech.icu/superbed/2021/07/22/60f985f25132923bf80a49cf.jpg)
 
 这四类监控指标，在具体的业务和基础设施、中间件场景，要监控的项各有不同：
 
