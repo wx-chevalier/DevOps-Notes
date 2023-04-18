@@ -20,6 +20,6 @@
 
 Kubernetes 细化的应用程序的分解粒度，同时将服务发现、配置管理、负载均衡和健康检查等作为基础设施的功能，简化了应用程序的开发。而 Kubernetes 这种声明式配置尤其适合 CI/CD 流程，况且现在还有如 Helm、Draft、Spinnaker、Skaffold 等开源工具可以帮助我们发布 Kuberentes 应用。
 
-![](https://i.postimg.cc/J0gGNr9m/image.png)
+![](https://assets.ng-tech.icu/item/20230418224147.png)
 
 有了基于 Kubernetes 的 CI/CD 流程后，又诞生了 GitOps 和 SecOps（Security Operation）。
