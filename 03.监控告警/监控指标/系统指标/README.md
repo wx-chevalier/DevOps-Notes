@@ -16,7 +16,7 @@
 
 ![常用 Linux 性能监控命令](https://s2.ax1x.com/2019/11/18/McwFOI.png)
 
-> 本部分仅列举出常用的命令，具体命令的使用请参考 [Linux 命令实践](https://github.com/wx-chevalier/Linux-Series)。
+> 本部分仅列举出常用的命令，具体命令的使用请参考 [Linux 命令实践](https://github.com/wx-chevalier/Linux-Notes)。
 
 # Links
 

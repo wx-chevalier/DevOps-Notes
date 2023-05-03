@@ -7,7 +7,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
-  <a href="https://github.com/wx-chevalier/DevOps-Series">
+  <a href="https://github.com/wx-chevalier/DevOps-Notes">
     <img src="https://s2.ax1x.com/2020/01/23/1V2lA1.png" alt="Logo" width="150" height="80">
   </a>
 
@@ -16,14 +16,14 @@
   <p align="center">
     软件开发后：测试、部署、监控、运维
     <br />
-    <a href="https://github.com/wx-chevalier/DevOps-Series"><strong>在线阅读 >> </strong></a>
+    <a href="https://github.com/wx-chevalier/DevOps-Notes"><strong>在线阅读 >> </strong></a>
     <br />
     <br />
-    <a href="https://github.com/wx-chevalier/DevOps-Series">速览手册</a>
+    <a href="https://github.com/wx-chevalier/DevOps-Notes">速览手册</a>
     ·
-    <a href="https://github.com/wx-chevalier/DevOps-Series/issues">Report Bug</a>
+    <a href="https://github.com/wx-chevalier/DevOps-Notes/issues">Report Bug</a>
     ·
-    <a href="https://github.com/wx-chevalier/DevOps-Series/issues">参考资料</a>
+    <a href="https://github.com/wx-chevalier/DevOps-Notes/issues">参考资料</a>
   </p>
 </p>
 
@@ -35,7 +35,7 @@
 
 DevOps 与 SRE 实战涵盖了笔者对于大型软件系统开发与运维工程中的偏交付、运维向的知识沉淀。DevOps 的出现，运维的身份职责发生了转变，它不再是专门跑任务脚本或者与机器打交道的人，而是变成了 OpenStack 或者 Kubernetes 的专家，通过搭建/管理相关的分布式集群，为研发提供可靠的应用运行环境。DevOps 更重要的方面还是改变了应用交付的流程，从传统的搭火车模式走向持续交付，应用的架构和形态改变了，其方法论也随之而改变。DevOps 和持续交付也被认为是云原生应用的要素。至于 AIOps 是 DevOps 在实践 AI 过程中的一些应用，称不上是范式的改变，AI 在运维领域还远远取代不了人的作用。
 
-> 本书的精排目录导航版请参考 [https://ng-tech.icu/books/DevOps-Series](https://ng-tech.icu/books/DevOps-Series)。
+> 本书的精排目录导航版请参考 [https://ng-tech.icu/books/DevOps-Notes](https://ng-tech.icu/books/DevOps-Notes)。
 
 ## 背景分析
 
@@ -94,13 +94,13 @@ Contributions are what make the open source community such an amazing place to b
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/wx-chevalier/DevOps-Series.svg?style=flat-square
-[contributors-url]: https://github.com/wx-chevalier/DevOps-Series/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/wx-chevalier/DevOps-Series.svg?style=flat-square
-[forks-url]: https://github.com/wx-chevalier/DevOps-Series/network/members
-[stars-shield]: https://img.shields.io/github/stars/wx-chevalier/DevOps-Series.svg?style=flat-square
-[stars-url]: https://github.com/wx-chevalier/DevOps-Series/stargazers
-[issues-shield]: https://img.shields.io/github/issues/wx-chevalier/DevOps-Series.svg?style=flat-square
-[issues-url]: https://github.com/wx-chevalier/DevOps-Series/issues
-[license-shield]: https://img.shields.io/github/license/wx-chevalier/DevOps-Series.svg?style=flat-square
-[license-url]: https://github.com/wx-chevalier/DevOps-Series/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/wx-chevalier/DevOps-Notes.svg?style=flat-square
+[contributors-url]: https://github.com/wx-chevalier/DevOps-Notes/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/wx-chevalier/DevOps-Notes.svg?style=flat-square
+[forks-url]: https://github.com/wx-chevalier/DevOps-Notes/network/members
+[stars-shield]: https://img.shields.io/github/stars/wx-chevalier/DevOps-Notes.svg?style=flat-square
+[stars-url]: https://github.com/wx-chevalier/DevOps-Notes/stargazers
+[issues-shield]: https://img.shields.io/github/issues/wx-chevalier/DevOps-Notes.svg?style=flat-square
+[issues-url]: https://github.com/wx-chevalier/DevOps-Notes/issues
+[license-shield]: https://img.shields.io/github/license/wx-chevalier/DevOps-Notes.svg?style=flat-square
+[license-url]: https://github.com/wx-chevalier/DevOps-Notes/blob/master/LICENSE.txt

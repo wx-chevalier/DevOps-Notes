@@ -1,6 +1,6 @@
 # 监控告警
 
-本部分主要着眼于服务端系统的监控与告警，前端相关的监控体系建设请参考 [Web Series](https://github.com/wx-chevalier/Web-Series)。
+本部分主要着眼于服务端系统的监控与告警，前端相关的监控体系建设请参考 [Web Series](https://github.com/wx-chevalier/Web-Notes)。
 
 ![监控与告警体系思维脑图](https://s1.ax1x.com/2020/08/08/aIFbSf.png)
 
