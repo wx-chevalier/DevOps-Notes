@@ -82,7 +82,10 @@
   - [6 05.SRE [4]](/05.SRE/README.md)
     - [6.1 API 安全](/05.SRE/API%20安全/README.md)
       
-    - [6.2 Linux 安全加固](/05.SRE/Linux%20安全加固.md)
+    - 6.2 Linux 安全加固 [2]
+      - 6.2.1 99.参考资料 [1]
+        - [6.2.1.1 How To Secure A Linux Server](/05.SRE/Linux%20安全加固/99.参考资料/2023-How%20To%20Secure%20A%20Linux%20Server.md)
+      - [6.2.2 Linux 安全加固](/05.SRE/Linux%20安全加固/Linux%20安全加固.md)
     - 6.3 备份 [1]
       - [6.3.1 文件备份](/05.SRE/备份/文件备份.md)
     - [6.4 零信任](/05.SRE/零信任/README.md)
