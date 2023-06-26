@@ -52,29 +52,30 @@ st: steal time - - % CPU time in involuntary wait by virtual cpu while hyperviso
 
 此外，我们也可以使用扩展 [htop](https://github.com/hishamhm/htop) 或者 [glances](https://github.com/nicolargo/glances)；如果针对容器监控，可以使用 [ctop](https://github.com/bcicen/ctop)。
 
-➊ 在命令行输入 top，然后 shift+p 查看占用 CPU 最高的进程，记下进程号
-➋ 在命令行输入 top -Hp 进程号，查看占用 CPU 最高的线程
-➌ 使用 printf 0x%x 线程号，得到其 16 进制线程号
-➍ 使用 jstack 进程号得到 java 执行栈，然后 grep16 进制找到相应的信息
+- 在命令行输入 top，然后 shift+p 查看占用 CPU 最高的进程，记下进程号
+- 在命令行输入 top -Hp 进程号，查看占用 CPU 最高的线程
+- 使用 printf 0x%x 线程号，得到其 16 进制线程号
+- 使用 jstack 进程号得到 java 执行栈，然后 grep16 进制找到相应的信息
 
-ps -eo %cpu,pid |sort -n -k1 -r | head -n 1 | awk '{print $2}' |xargs  top -b -n1 -Hp | grep COMMAND -A1 | tail -n 1 | awk '{print $1}' | xargs printf 0x%x
+ps -eo %cpu,pid |sort -n -k1 -r | head -n 1 | awk '{print $2}' |xargs top -b -n1 -Hp | grep COMMAND -A1 | tail -n 1 | awk '{print $1}' | xargs printf 0x%x
 
 找到使用 CPU 最高的进程之使用 CPU 最高的线程的 16 进制号。
 
-➊ 如果 load 超过了 cpu 核数，则负载过高
-➋ 如果 wa 过高，可初步判断 IO 有问题
-➌ sy,si,hi,st，任何一个超过 5%，都有问题
-➍ 进程状态长时处于 D、Z、T 状态，提高注意度
-➎ cpu 不均衡，判断亲和性和优先级问题 ➊ 如果 load 超过了 cpu 核数，则负载过高
-➋ 如果 wa 过高，可初步判断 IO 有问题
-➌ sy,si,hi,st，任何一个超过 5%，都有问题
-➍ 进程状态长时处于 D、Z、T 状态，提高注意度
-➎ cpu 不均衡，判断亲和性和优先级问题
+- 如果 load 超过了 cpu 核数，则负载过高
+- 如果 wa 过高，可初步判断 IO 有问题
+- sy,si,hi,st，任何一个超过 5%，都有问题
+- 进程状态长时处于 D、Z、T 状态，提高注意度
+- cpu 不均衡，判断亲和性和优先级问题 ➊ 如果 load 超过了 cpu 核数，则负载过高
+- 如果 wa 过高，可初步判断 IO 有问题
+- sy,si,hi,st，任何一个超过 5%，都有问题
+- 进程状态长时处于 D、Z、T 状态，提高注意度
+- cpu 不均衡，判断亲和性和优先级问题
 
 除了关注类似 top 的一些指标，还有：
-➊ b 置于等待队列（等待资源、等待输入/输出）的内核线程数目。数字过大则 cpu 太忙。
-➋ cs 如果频繁的进行上下文切换，则考虑是否是线程数开的过多
-➌ si/so 显示了交换分区的现状，有时候会造成 cpu 问题，一并关注
+
+- b 置于等待队列（等待资源、等待输入/输出）的内核线程数目。数字过大则 cpu 太忙。
+- cs 如果频繁的进行上下文切换，则考虑是否是线程数开的过多
+- si/so 显示了交换分区的现状，有时候会造成 cpu 问题，一并关注
 
 # htop
 
