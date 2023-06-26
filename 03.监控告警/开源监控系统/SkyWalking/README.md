@@ -1,6 +1,6 @@
 # SkyWalking
 
-官方给 SkyWalking 的定义是一个分布式系统的应用程序性能监视工具，也是一个开源的可观测平台, 用于从服务和云原生基础设施收集、 分析、 聚合及可视化数据。SkyWalking 提供了一种简便的方式来清晰地观测分布式系统, 甚至横跨多个云平台。SkyWalking 更是一个现代化的应用程序性能监控(Application Performance Monitoring)系统, 尤其专为云原生、基于容器的分布式系统设计。
+官方给 SkyWalking 的定义是一个分布式系统的应用程序性能监视工具，也是一个开源的可观测平台, 用于从服务和云原生基础设施收集、分析、聚合及可视化数据。SkyWalking 提供了一种简便的方式来清晰地观测分布式系统, 甚至横跨多个云平台。SkyWalking 更是一个现代化的应用程序性能监控(Application Performance Monitoring)系统, 尤其专为云原生、基于容器的分布式系统设计。
 
 ## SkyWalking 的功能
 
