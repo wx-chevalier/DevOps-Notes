@@ -1,7 +1,7 @@
-  - 1 00.DevOps 文化 [1]
-    - 1.1 99.参考资料 [2]
-      - [1.1.1 万字长文带你彻底搞懂什么是 DevOps](/00.DevOps%20文化/99.参考资料/2021-万字长文带你彻底搞懂什么是%20DevOps.md)
-      - [1.1.2 必致（BizDevOps）](/00.DevOps%20文化/99.参考资料/2023-必致（BizDevOps）.md)
+  - 1 00~DevOps 文化 [1]
+    - 1.1 99~参考资料 [2]
+      - [1.1.1 万字长文带你彻底搞懂什么是 DevOps](/00~DevOps%20文化/99~参考资料/2021-万字长文带你彻底搞懂什么是%20DevOps.md)
+      - [1.1.2 必致（BizDevOps）](/00~DevOps%20文化/99~参考资料/2023-必致（BizDevOps）.md)
   - [2 01.持续集成与交付 [4]](/01.持续集成与交付/README.md)
     - 2.1 CI [1]
       - [2.1.1 CI](/01.持续集成与交付/CI/CI.md)
@@ -83,9 +83,9 @@
     - [6.1 API 安全](/05.SRE/API%20安全/README.md)
       
     - 6.2 Linux 安全加固 [2]
-      - 6.2.1 99.参考资料 [2]
-        - [6.2.1.1 Linux Hardening Guide](/05.SRE/Linux%20安全加固/99.参考资料/2022-Linux%20Hardening%20Guide.md)
-        - [6.2.1.2 How To Secure A Linux Server](/05.SRE/Linux%20安全加固/99.参考资料/2023-How%20To%20Secure%20A%20Linux%20Server.md)
+      - 6.2.1 99~参考资料 [2]
+        - [6.2.1.1 Linux Hardening Guide](/05.SRE/Linux%20安全加固/99~参考资料/2022-Linux%20Hardening%20Guide.md)
+        - [6.2.1.2 How To Secure A Linux Server](/05.SRE/Linux%20安全加固/99~参考资料/2023-How%20To%20Secure%20A%20Linux%20Server.md)
       - [6.2.2 Linux 安全加固](/05.SRE/Linux%20安全加固/Linux%20安全加固.md)
     - 6.3 备份 [1]
       - [6.3.1 文件备份](/05.SRE/备份/文件备份.md)
