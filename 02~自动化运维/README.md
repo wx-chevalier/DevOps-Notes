@@ -2,7 +2,7 @@
 
 近几年随着大数据技术的爆发、系统规模和复杂度的提升以及行业开始对 ServiceMesh、FaaS 等云原生技术体系的探索，自动化运维与管控在业界及公司内的重要性越发凸显。直观来看，服务器的数量迅速地从几十台、上百台增加到成千上万台。企业内部服务器数量的大幅增长，使得服务器出现故障的频次也大幅增加，手工运维时代的瓶颈随之到来。运维工程师越来越难以远程登录每一台服务器去搭建环境、部署应用、清理磁盘、查看服务器状态以及排查系统错误，此时急需自动化运维体系与开发技术体系配合。
 
-![](https://assets.ng-tech.icu/item/20230417211744.png)
+![](https://ngte-superbed.oss-cn-beijing.aliyuncs.com/item/20230417211744.png)
 
 从工具的角度来看，自动化运维工具主要包括两大类：监控自动化工具以及流程自动化工具：
 
@@ -20,6 +20,6 @@
 
 Kubernetes 细化的应用程序的分解粒度，同时将服务发现、配置管理、负载均衡和健康检查等作为基础设施的功能，简化了应用程序的开发。而 Kubernetes 这种声明式配置尤其适合 CI/CD 流程，况且现在还有如 Helm、Draft、Spinnaker、Skaffold 等开源工具可以帮助我们发布 Kuberentes 应用。
 
-![](https://assets.ng-tech.icu/item/20230418224147.png)
+![](https://ngte-superbed.oss-cn-beijing.aliyuncs.com/item/20230418224147.png)
 
 有了基于 Kubernetes 的 CI/CD 流程后，又诞生了 GitOps 和 SecOps（Security Operation）。
