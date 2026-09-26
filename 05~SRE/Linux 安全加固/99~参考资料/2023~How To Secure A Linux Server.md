@@ -1740,8 +1740,7 @@ ufw ships with some default applications. You can see them with:
 
 ```bash
 sudo ufw app list
-```
-
+```bash
 > ```
 > Available applications:
 >   AIM
@@ -1789,8 +1788,7 @@ To get details about the app, like which ports it includes, type:
 
 ```bash
 sudo ufw app info [app name]
-```
-
+```bash
 > ```bash
 > sudo ufw app info DNS
 > ```
@@ -1812,8 +1810,7 @@ For example, here is what you would use for [Plex](https://support.plex.tv/artic
 
 ```bash
 cat /etc/ufw/applications.d/plexmediaserver
-```
-
+```bash
 > ```
 > [PlexMediaServer]
 > title=Plex Media Server
@@ -1825,8 +1822,7 @@ Then you can enable it like any other app:
 
 ```bash
 sudo ufw allow plexmediaserver
-```
-
+```bash
 ([Table of Contents](#table-of-contents))
 
 ### iptables Intrusion Detection And Prevention with PSAD
@@ -2123,14 +2119,12 @@ To unban an IP use this command:
 
 ```bash
 fail2ban-client set [jail] unbanip [IP]
-```
-
+```bash
 `[jail]` is the name of the jail that has the banned IP and `[IP]` is the IP address you want to unban. For example, to unaban `192.168.1.100` from SSH you would do:
 
 ```bash
 fail2ban-client set sshd unbanip 192.168.1.100
-```
-
+```bash
 ([Table of Contents](#table-of-contents))
 
 ## The Auditing
@@ -2345,8 +2339,7 @@ Every time you make changes to files/folders that AIDE monitors, you will need t
 
 ```bash
 sudo aideinit -y -f
-```
-
+```bash
 ([Table of Contents](#table-of-contents))
 
 ### Anti-Virus Scanning With ClamAV (WIP)
@@ -2859,8 +2852,7 @@ From [https://github.com/ossec/ossec-hids](https://github.com/ossec/ossec-hids)
 
 ```bash
  sudo /var/ossec/bin/agent_control -i <AGENT_ID>
-```
-
+```bash
 `AGENT_ID` by default is `000`, to be sure the command `sudo /var/ossec/bin/agent_control -l` can be used.
 
 **Run integrity/rootkit checking**
@@ -2869,8 +2861,7 @@ OSSEC by default run rootkit check each 2 hours.
 
 ```bash
  sudo /var/ossec/bin/agent_control -u <AGENT_ID> -r
-```
-
+```bash
 **Alerts**
 
 - All:
@@ -2984,8 +2975,7 @@ I won't provide [For the lazy](#editing-configuration-files---for-the-lazy) code
 
 ```bash
 sudo sysctl -p >/dev/null
-```
-
+```bash
 </details><br />
 
 ([Table of Contents](#table-of-contents))

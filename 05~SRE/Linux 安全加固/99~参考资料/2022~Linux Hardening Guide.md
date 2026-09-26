@@ -85,10 +85,9 @@ To conclude, there is a trade-off when choosing a stable or LTS kernel. LTS kern
 
 Sysctl is a tool that allows the user to configure certain kernel settings and enable various security features or disable dangerous features to reduce attack surface. To change settings temporarily you can execute:
 
-```
+```bash
 sysctl -w $tunable = $value
-```
-
+```bash
 To change sysctls permanently, you can add the one you want to change to `/etc/sysctl.conf` or the corresponding files within `/etc/sysctl.d`, depending on your Linux distribution.
 
 Since Linux 5.8, [sysctls can also be set](https://github.com/torvalds/linux/blob/97e9c8eb4bb1dc57859acb1338dfddbd967d7484/Documentation/admin-guide/kernel-parameters.txt#L5681-L5688) via the `sysctl.$tunable=$value` [boot parameter](https://madaidans-insecurities.github.io/guides/linux-hardening.html#boot-parameters). This may be better, as it is set at the beginning of the boot process, without depending on a user space service to read the values from configuration files.
@@ -97,93 +96,80 @@ The following are the recommended sysctl settings that you should change.
 
 #### [2.2.1 Kernel self-protection](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl-kernel)
 
-```
+```bash
 kernel.kptr_restrict=2
-```
-
+```bash
 A kernel pointer points to a specific location in kernel memory. [These can be very useful in exploiting the kernel](https://kernsec.org/wiki/index.php/Bug_Classes/Kernel_pointer_leak), but kernel pointers are not hidden by default — it is easy to uncover them by, for example, reading the contents of `/proc/kallsyms`. This setting aims to mitigate kernel pointer leaks. Alternatively, you can set `kernel.kptr_restrict=1` to only hide kernel pointers from processes without the `CAP_SYSLOG` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities).
 
-```
+```bash
 kernel.dmesg_restrict=1
-```
-
+```bash
 [dmesg](https://en.wikipedia.org/wiki/Dmesg) is the kernel log. It exposes a large amount of useful kernel debugging information, but this can often leak sensitive information, such as kernel pointers. Changing the above sysctl restricts the kernel log to the `CAP_SYSLOG` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities).
 
-```
+```bash
 kernel.printk=3 3 3 3
-```
-
+```bash
 Despite the value of `dmesg_restrict`, the kernel log will still be displayed in the console during boot. Malware that is able to record the screen during boot may be able to abuse this to gain higher privileges. This option prevents those information leaks. This must be used in combination with certain boot parameters [described below](https://madaidans-insecurities.github.io/guides/linux-hardening.html#boot-kernel) to be fully effective.
 
-```
+```bash
 kernel.unprivileged_bpf_disabled=1
 net.core.bpf_jit_harden=2
-```
-
+```bash
 [eBPF exposes quite large attack surface](https://madaidans-insecurities.github.io/linux.html#kernel). As such, it must be restricted. These sysctls restrict eBPF to the `CAP_BPF` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities) (`CAP_SYS_ADMIN` on kernel versions prior to 5.8) and enable JIT hardening techniques, such as [constant blinding](https://github.com/torvalds/linux/blob/9e4b0d55d84a66dbfede56890501dc96e696059c/include/linux/filter.h#L1039-L1070).
 
-```
+```bash
 dev.tty.ldisc_autoload=0
-```
-
+```bash
 This [restricts loading TTY line disciplines](https://lkml.org/lkml/2019/4/15/890) to the `CAP_SYS_MODULE` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities) to prevent unprivileged attackers from loading vulnerable line disciplines with the `TIOCSETD` ioctl, which [has been abused in a number of exploits before](https://a13xp0p0v.github.io/2017/03/24/CVE-2017-2636.html).
 
-```
+```bash
 vm.unprivileged_userfaultfd=0
-```
-
+```bash
 The `userfaultfd()` syscall is [often](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=cefdca0a86be517bc390fc4541e3674b8e7803b0) [abused](https://duasynt.com/blog/linux-kernel-heap-spray) to exploit use-after-free flaws. Due to this, this sysctl is used to restrict this syscall to the `CAP_SYS_PTRACE` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities).
 
-```
+```bash
 kernel.kexec_load_disabled=1
-```
-
+```bash
 [kexec is a system call that is used to boot another kernel during runtime](https://en.wikipedia.org/wiki/Kexec). This functionality can be abused to load a malicious kernel and gain arbitrary code execution in kernel mode, so this sysctl disables it.
 
-```
+```bash
 kernel.sysrq=4
-```
-
+```bash
 The [SysRq key](https://www.kernel.org/doc/html/latest/admin-guide/sysrq.html) exposes a lot of potentially dangerous debugging functionality to unprivileged users. Contrary to common assumptions, SysRq is not only an issue for physical attacks, as [it can also be triggered remotely](https://github.com/xairy/unlockdown). The value of this sysctl makes it so that a user can only use the [secure attention key](https://www.kernel.org/doc/Documentation/SAK.txt), which will be necessary for [accessing root securely](https://madaidans-insecurities.github.io/guides/linux-hardening.html#accessing-root-securely). Alternatively, you can simply set the value to `0` to disable SysRq completely.
 
-```
+```bash
 kernel.unprivileged_userns_clone=0
-```
-
+```bash
 User namespaces are a feature in the kernel which aim to improve sandboxing and make it easily accessible for unprivileged users. However, [this feature exposes significant kernel attack surface for privilege escalation](https://madaidans-insecurities.github.io/linux.html#kernel), so this sysctl restricts the usage of user namespaces to the `CAP_SYS_ADMIN` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities). For unprivileged sandboxing, it is instead recommended to use a setuid binary with little attack surface to minimise the potential for privilege escalation. This topic is covered further in the [sandboxing section](https://madaidans-insecurities.github.io/guides/linux-hardening.html#application-sandboxing).
 
 Be aware though that this sysctl only exists on certain Linux distributions, as it requires a kernel patch. If your kernel does not include this patch, you can alternatively disable user namespaces completely (including for root) by setting `user.max_user_namespaces=0`.
 
-```
+```bash
 kernel.perf_event_paranoid=3
-```
-
+```bash
 [Performance events add considerable kernel attack surface and have caused abundant vulnerabilities](https://lore.kernel.org/kernel-hardening/1469630746-32279-1-git-send-email-jeffv@google.com/). This sysctl restricts all usage of performance events to the `CAP_PERFMON` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities) (`CAP_SYS_ADMIN` on kernel versions prior to 5.8).
 
 Be aware that this sysctl also requires a kernel patch that is only available on certain distributions. Otherwise, this setting is equivalent to `kernel.perf_event_paranoid=2`, [which only restricts a subset of this functionality](https://www.kernel.org/doc/html/latest/admin-guide/perf-security.html#unprivileged-users).
 
 #### [2.2.2 Network](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl-network)
 
-```
+```bash
 net.ipv4.tcp_syncookies=1
-```
-
+```bash
 This helps protect against [SYN flood attacks](https://en.wikipedia.org/wiki/SYN_flood), which are a form of denial-of-service attack, in which an attacker sends a large amount of bogus SYN requests in an attempt to consume enough resources to make the system unresponsive to legitimate traffic.
 
-```
+```bash
 net.ipv4.tcp_rfc1337=1
-```
-
+```bash
 This protects against [time-wait assassination](https://tools.ietf.org/html/rfc1337) by dropping RST packets for sockets in the time-wait state.
 
-```
+```bash
 net.ipv4.conf.all.rp_filter=1
 net.ipv4.conf.default.rp_filter=1
-```
-
+```bash
 These enable source validation of packets received from all interfaces of the machine. This protects against [IP spoofing](https://en.wikipedia.org/wiki/IP_address_spoofing), in which an attacker sends a packet with a fraudulent IP address.
 
-```
+```bash
 net.ipv4.conf.all.accept_redirects=0
 net.ipv4.conf.default.accept_redirects=0
 net.ipv4.conf.all.secure_redirects=0
@@ -192,69 +178,60 @@ net.ipv6.conf.all.accept_redirects=0
 net.ipv6.conf.default.accept_redirects=0
 net.ipv4.conf.all.send_redirects=0
 net.ipv4.conf.default.send_redirects=0
-```
-
+```bash
 These disable ICMP redirect acceptance and sending to [prevent man-in-the-middle attacks](https://askubuntu.com/questions/118273/what-are-icmp-redirects-and-should-they-be-blocked) and minimise information disclosure.
 
-```
+```bash
 net.ipv4.icmp_echo_ignore_all=1
-```
-
+```bash
 This setting makes your system ignore all ICMP requests to avoid [Smurf attacks](https://en.wikipedia.org/wiki/Smurf_attack), make the device more difficult to enumerate on the network and [prevent clock fingerprinting through ICMP timestamps](https://madaidans-insecurities.github.io/guides/linux-hardening.html#icmp-timestamps).
 
-```
+```bash
 net.ipv4.conf.all.accept_source_route=0
 net.ipv4.conf.default.accept_source_route=0
 net.ipv6.conf.all.accept_source_route=0
 net.ipv6.conf.default.accept_source_route=0
-```
-
+```bash
 [Source routing is a mechanism that allows users to redirect network traffic](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/security_guide/sect-security_guide-server_security-disable-source-routing). As this can be used to perform man-in-the-middle attacks in which the traffic is redirected for nefarious purposes, the above settings disable this functionality.
 
-```
+```bash
 net.ipv6.conf.all.accept_ra=0
 net.ipv6.conf.default.accept_ra=0
-```
-
+```bash
 Malicious IPv6 router advertisements [can result in a man-in-the-middle attack](https://tools.cisco.com/security/center/resources/ipv6_first_hop), so they should be disabled.
 
-```
+```bash
 net.ipv4.tcp_sack=0
 net.ipv4.tcp_dsack=0
 net.ipv4.tcp_fack=0
-```
-
+```bash
 This disables [TCP SACK](https://tools.ietf.org/html/rfc2018). SACK is [commonly exploited](https://github.com/Netflix/security-bulletins/blob/master/advisories/third-party/2019-001.md) and [unnecessary in many circumstances](https://serverfault.com/questions/10955/when-to-turn-tcp-sack-off), so it should be disabled if it is not required.
 
 #### [2.2.3 User space](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl-userspace)
 
-```
+```bash
 kernel.yama.ptrace_scope=2
-```
-
+```bash
 [ptrace is a system call that allows a program to alter and inspect another running process](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html), which allows attackers to trivially modify the memory of other running programs. This restricts usage of ptrace to only processes with the `CAP_SYS_PTRACE` [capability](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities). Alternatively, set the sysctl to `3` to disable ptrace entirely.
 
-```
+```bash
 vm.mmap_rnd_bits=32
 vm.mmap_rnd_compat_bits=16
-```
-
+```bash
 [ASLR](https://en.wikipedia.org/wiki/Address_space_layout_randomization) is a common exploit mitigation which randomises the position of critical parts of a process in memory. This can make a wide variety of exploits harder to pull off, as they first require an information leak. The above settings increase the bits of entropy used for mmap ASLR, improving its effectiveness.
 
 The values of these sysctls must be set in relation to the CPU architecture. The above values are compatible with x86, but other architectures may differ.
 
-```
+```bash
 fs.protected_symlinks=1
 fs.protected_hardlinks=1
-```
-
+```bash
 This only permits symlinks to be followed when outside of a world-writable sticky directory, when the owner of the symlink and follower match or when the directory owner matches the symlink's owner. This also prevents hardlinks from being created by users that do not have read/write access to the source file. Both of these prevent many common [TOCTOU races](https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use).
 
-```
+```bash
 fs.protected_fifos=2
 fs.protected_regular=2
-```
-
+```bash
 [These prevent creating files in potentially attacker-controlled environments](https://github.com/torvalds/linux/commit/30aba6656f61ed44cba445a3c0d38b296fa9e8f5), such as world-writable directories, to make data spoofing attacks more difficult.
 
 ### [2.3 Boot parameters](https://madaidans-insecurities.github.io/guides/linux-hardening.html#boot-parameters)
@@ -271,113 +248,97 @@ This section originally recommended to apply various `slub_debug` options; howev
 
 #### [2.3.1 Kernel self-protection](https://madaidans-insecurities.github.io/guides/linux-hardening.html#boot-kernel)
 
-```
+```bash
 slab_nomerge
-```
-
+```bash
 This disables slab merging, which significantly increases the difficulty of heap exploitation by [preventing overwriting objects from merged caches](https://www.openwall.com/lists/kernel-hardening/2017/06/19/33) and by [making it harder to influence slab cache layout](https://www.openwall.com/lists/kernel-hardening/2017/06/20/10).
 
-```
+```bash
 init_on_alloc=1 init_on_free=1
-```
-
+```bash
 This enables [zeroing of memory during allocation and free time](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=6471384af2a6530696fc0203bafe4de41a23c9ef), which can help mitigate use-after-free vulnerabilities and erase sensitive information in memory.
 
-```
+```bash
 page_alloc.shuffle=1
-```
-
+```bash
 This option [randomises page allocator freelists](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=e900a918b0984ec8f2eb150b8477a47b75d17692), improving security by making page allocations less predictable. This also _improves_ performance.
 
-```
+```bash
 pti=on
-```
-
+```bash
 This enables [Kernel Page Table Isolation](https://en.wikipedia.org/wiki/Kernel_page-table_isolation), which mitigates Meltdown and prevents some KASLR bypasses.
 
-```
+```bash
 randomize_kstack_offset=on
-```
-
+```bash
 This option [randomises the kernel stack offset on each syscall](https://lkml.org/lkml/2019/3/18/246), which makes attacks that rely on deterministic kernel stack layout significantly more difficult, such as the [exploitation of CVE-2019-18683](https://a13xp0p0v.github.io/2020/02/15/CVE-2019-18683.html).
 
-```
+```bash
 vsyscall=none
-```
-
+```bash
 This disables [vsyscalls](https://lwn.net/Articles/446528/), as they are obsolete and have been replaced with [vDSO](https://en.wikipedia.org/wiki/VDSO). vsyscalls are also at fixed addresses in memory, making them a potential target for ROP attacks.
 
-```
+```bash
 debugfs=off
-```
-
+```bash
 This disables debugfs, [which exposes a lot of sensitive information about the kernel](https://lkml.org/lkml/2020/7/16/122).
 
-```
+```bash
 oops=panic
-```
-
+```bash
 Sometimes certain kernel exploits will cause what is known as an ["oops"](https://en.wikipedia.org/wiki/Linux_kernel_oops). This parameter will cause the kernel to panic on such oopses, thereby preventing those exploits. However, sometimes bad drivers cause harmless oopses which would result in your system crashing, meaning this boot parameter can only be used on certain hardware.
 
-```
+```bash
 module.sig_enforce=1
-```
-
+```bash
 This only allows kernel modules that have been signed with a valid key to be loaded, which increases security by making it much harder to load a malicious kernel module. This prevents all out-of-tree kernel modules, including DKMS modules from being loaded [unless you have signed them](https://www.kernel.org/doc/html/latest/admin-guide/module-signing.html), meaning that modules such as the VirtualBox or Nvidia drivers may not be usable, although that may not be important, depending on your setup.
 
-```
+```bash
 lockdown=confidentiality
-```
-
+```bash
 The [kernel lockdown LSM](https://mjg59.dreamwidth.org/55105.html) can eliminate many methods that user space code could abuse to escalate to kernel privileges and extract sensitive information. This LSM is necessary to implement a clear security boundary between user space and the kernel. The above option enables this feature in confidentiality mode, the strictest option. This implies `module.sig_enforce=1`.
 
-```
+```bash
 mce=0
-```
-
+```bash
 This causes the kernel to panic on uncorrectable errors in ECC memory which could be exploited. This is unnecessary for systems without ECC memory.
 
-```
+```bash
 quiet loglevel=0
-```
-
+```bash
 These parameters prevent information leaks during boot and must be used in combination with the `kernel.printk` sysctl [documented above](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl-kernel).
 
 #### [2.3.2 CPU mitigations](https://madaidans-insecurities.github.io/guides/linux-hardening.html#cpu-mitigations)
 
 It is best to enable all CPU mitigations that are applicable to your CPU as to ensure that you are not affected by known vulnerabilities. This is a list that enables all built-in mitigations:
 
-```
+```bash
 spectre_v2=on spec_store_bypass_disable=on tsx=off tsx_async_abort=full,nosmt mds=full,nosmt l1tf=full,force nosmt=force kvm.nx_huge_pages=force
-```
-
+```bash
 You must research the CPU vulnerabilities that your system is affected by and apply a selection of the above mitigations accordingly. Keep in mind that you will need to [install microcode updates](https://madaidans-insecurities.github.io/guides/linux-hardening.html#microcode) to be fully protected from these vulnerabilities. All of these may cause a significant performance decrease.
 
 #### [2.3.3 Result](https://madaidans-insecurities.github.io/guides/linux-hardening.html#result)
 
 If you have followed all of the above recommendations, excluding your specific CPU mitigations, you will have:
 
-```
+```bash
 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 quiet loglevel=0
-```
-
+```bash
 You may need to [regenerate your GRUB configuration file](https://madaidans-insecurities.github.io/guides/linux-hardening.html#regenerate-grub-config) to apply these if using GRUB as your bootloader.
 
 ### [2.4 hidepid](https://madaidans-insecurities.github.io/guides/linux-hardening.html#hidepid)
 
 `/proc` is a pseudo-filesystem that contains information about all processes currently running on the system. By default, this is accessible to all users, which can allow an attacker to spy on other processes. To permit users to only see their own processes and not those of other users, you must mount `/proc` with the `hidepid=2,gid=proc` mount options. `gid=proc` exempts the `proc` group from this feature so you can whitelist specific users or processes. One way to add these mount options is to edit `/etc/fstab` and add:
 
-```
+```bash
 proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0
-```
-
+```bash
 systemd-logind still needs to see other users' processes, so for user sessions to work correctly on a systemd system, you must create `/etc/systemd/system/systemd-logind.service.d/hidepid.conf` and add:
 
-```
+```bash
 [Service]
 SupplementaryGroups=proc
-```
-
+```bash
 ### [2.5 Kernel attack surface reduction](https://madaidans-insecurities.github.io/guides/linux-hardening.html#kernel-attack-surface-reduction)
 
 It is best to disable any functionality that is not absolutely required as to minimise potential kernel attack surface. These features do not necessarily have to be dangerous; they could simply be benign code that is removed to reduce attack surface. Never disable random things that you don't understand. The following are some examples that may be of use, depending on your setup.
@@ -386,10 +347,9 @@ It is best to disable any functionality that is not absolutely required as to mi
 
 Boot parameters can often be used to reduce attack surface. One such example is:
 
-```
+```bash
 ipv6.disable=1
-```
-
+```bash
 This disables the entire IPv6 stack which may not be required if you have not migrated to it. Do not use this boot parameter if you are using IPv6.
 
 #### [2.5.2 Blacklisting kernel modules](https://madaidans-insecurities.github.io/guides/linux-hardening.html#kasr-kernel-modules)
@@ -400,7 +360,7 @@ Specific kernel modules can be blacklisted by inserting files into `/etc/modprob
 
 The `install` parameter tells `modprobe` to run a specific command instead of loading the module as normal. `/bin/false` is a command that simply returns `1`, which will essentially do nothing. Both of these together tells the kernel to run `/bin/false` instead of loading the module, which will prevent the module from being exploited by attackers. The following are kernel modules that are most likely to be unnecessary:
 
-```
+```bash
 install dccp /bin/false
 install sctp /bin/false
 install rds /bin/false
@@ -420,8 +380,7 @@ install p8023 /bin/false
 install p8022 /bin/false
 install can /bin/false
 install atm /bin/false
-```
-
+```bash
 Obscure networking protocols in particular add considerable remote attack surface. This blacklists:
 
 - DCCP — Datagram Congestion Control Protocol
@@ -444,7 +403,7 @@ Obscure networking protocols in particular add considerable remote attack surfac
 - CAN — Controller Area Network
 - ATM
 
-```
+```bash
 install cramfs /bin/false
 install freevxfs /bin/false
 install jffs2 /bin/false
@@ -452,38 +411,33 @@ install hfs /bin/false
 install hfsplus /bin/false
 install squashfs /bin/false
 install udf /bin/false
-```
-
+```bash
 This blacklists various rare filesystems.
 
-```
+```bash
 install cifs /bin/true
 install nfs /bin/true
 install nfsv3 /bin/true
 install nfsv4 /bin/true
 install ksmbd /bin/true
 install gfs2 /bin/true
-```
-
+```bash
 Network filesystems can also be blacklisted if not in use.
 
-```
+```bash
 install vivid /bin/false
-```
-
+```bash
 The [vivid driver](https://www.kernel.org/doc/html/v4.12/media/v4l-drivers/vivid.html) is only useful for testing purposes and [has been the cause of privilege escalation vulnerabilities](https://www.openwall.com/lists/oss-security/2019/11/02/1), so it should be disabled.
 
-```
+```bash
 install bluetooth /bin/false
 install btusb /bin/false
-```
-
+```bash
 This disables Bluetooth, [which has a history of security issues](https://en.wikipedia.org/wiki/Bluetooth#History_of_security_concerns).
 
-```
+```bash
 install uvcvideo /bin/false
-```
-
+```bash
 This disables the webcam to prevent it from being used to spy on you.
 
 You can also blacklist the microphone module; however, this can differ from system to system. To find the name of the module, look in `/proc/asound/modules` and blacklist it. For example, one such module is `snd_hda_intel`.
@@ -496,16 +450,14 @@ It would be preferred to physically remove these devices or, at the very least, 
 
 Wireless devices can be blacklisted through `rfkill` to reduce remote attack surface further. To blacklist all wireless devices, execute:
 
-```
+```bash
 rfkill block all
-```
-
+```bash
 WiFi can be unblocked with:
 
-```
+```bash
 rfkill unblock wifi
-```
-
+```bash
 On systems using systemd, [rfkill persists across sessions](https://www.freedesktop.org/software/systemd/man/systemd-rfkill.service.html). However, on systems using a different init system, you may have to create an init script to execute these commands upon boot.
 
 ### [2.6 Other kernel pointer leaks](https://madaidans-insecurities.github.io/guides/linux-hardening.html#other-kernel-pointer-leaks)
@@ -516,21 +468,19 @@ On the filesystem, there exists the kernel images and System.map files in `/boot
 
 Additionally, certain logging daemons, such as systemd's `journalctl`, include the kernel logs which can be used to bypass the above `dmesg_restrict` protection. Removing the user from the `adm` group is often sufficient to revoke access to these logs:
 
-```
+```bash
 gpasswd -d $user adm
-```
-
+```bash
 ### [2.7 Restricting access to sysfs](https://madaidans-insecurities.github.io/guides/linux-hardening.html#restricting-sysfs)
 
 [sysfs](https://www.kernel.org/doc/html/latest/filesystems/sysfs.html) is a pseudo-filesystem which provides large quantities of kernel and hardware information. It is commonly mounted at `/sys`. sysfs has been the cause of [numerous information leaks, particularly of kernel pointers](https://www.openwall.com/lists/kernel-hardening/2017/10/05/5). Whonix's [security-misc package](https://github.com/Whonix/security-misc) includes the [hide-hardware-info script](https://github.com/Whonix/security-misc/blob/master/usr/libexec/security-misc/hide-hardware-info), which restricts access to this directory as well as a few in `/proc` in an attempt to hide potential hardware identifiers and prevent kernel pointer leaks. This script is configurable and allows [whitelisting specific applications based on groups](https://www.whonix.org/wiki/Security-misc#Whitelisting_Applications). It is recommended to apply this and make it execute on boot with an init script. For example, [this is a systemd service to do so](https://github.com/Whonix/security-misc/blob/master/lib/systemd/system/hide-hardware-info.service).
 
 For basic functionality to work on systems using systemd, you must whitelist a few system services. This can be done by creating `/etc/systemd/system/user@.service.d/sysfs.conf` and adding:
 
-```
+```bash
 [Service]
 SupplementaryGroups=sysfs
-```
-
+```bash
 This will not fix everything though. Many applications may still break and it is up to you to whitelist them properly.
 
 ### [2.8 linux-hardened](https://madaidans-insecurities.github.io/guides/linux-hardening.html#linux-hardened)
@@ -563,22 +513,19 @@ The most used MAC systems are SELinux and AppArmor. SELinux is a lot more secure
 
 To enable AppArmor in the kernel, you must set the following [boot parameters](https://madaidans-insecurities.github.io/guides/linux-hardening.html#boot-parameters):
 
-```
+```bash
 apparmor=1 security=apparmor
-```
-
+```bash
 To enable SELinux instead, set these parameters:
 
-```
+```bash
 selinux=1 security=selinux
-```
-
+```bash
 Keep in mind that simply enabling a MAC system won't by itself magically increase security. You must develop strict policies to fully utilise it. For example, to create AppArmor profiles, execute:
 
-```
+```bash
 aa-genprof $path_to_program
-```
-
+```bash
 Open the program and start using it as you normally would. AppArmor will detect what files it needs to access and will add them to the profile if you choose. This alone will not be sufficient for high quality profiles though; seek the [AppArmor documentation](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation) for more details.
 
 If you want to take it a step further, you can setup a full system MAC policy that confines every single user space process by implementing an initramfs hook which enforces a MAC policy for the init system. This is how [Android uses SELinux](https://source.android.com/security/selinux) and how [Whonix will use AppArmor in the future](https://github.com/Whonix/apparmor-profile-everything). This is necessary for enforcing a strong security model implementing the [principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege).
@@ -623,7 +570,7 @@ As [discussed earlier](https://madaidans-insecurities.github.io/guides/linux-har
 
 [systemd is unrecommended](https://madaidans-insecurities.github.io/guides/linux-hardening.html#choosing-the-right-distro), but some may be unable to switch. These people can at the very least, sandbox services so they can only access what they need. Here is an example of a sandboxed systemd service:
 
-```
+```bash
 [Service]
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 ProtectSystem=strict
@@ -652,8 +599,7 @@ SystemCallArchitectures=native
 UMask=0077
 IPAddressDeny=any
 AppArmorProfile=/etc/apparmor.d/usr.bin.example
-```
-
+```bash
 Explanations of all the options:
 
 - `CapabilityBoundingSet=` — Specifies the [capabilities](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities) the process is given.
@@ -701,28 +647,24 @@ While not a traditional "sandbox", [virtual machines](https://en.wikipedia.org/w
 
 hardened_malloc can be used per-application via the `LD_PRELOAD` environment variable. For example, assuming the library you have compiled is located at `/usr/lib/libhardened_malloc.so`, you can execute:
 
-```
+```bash
 LD_PRELOAD="/usr/lib/libhardened_malloc.so" $program
-```
-
+```bash
 It can also be used system-wide by globally preloading the library, which is the recommended way of using it. To do so, edit `/etc/ld.so.preload` and insert:
 
-```
+```bash
 /usr/lib/libhardened_malloc.so
-```
-
+```bash
 hardened_malloc may break some applications, although the majority will work fine. If issues are experienced, it is recommended to compile hardened_malloc in its "light" configuration via the following build option in order to minimise breakage:
 
-```
+```bash
 VARIANT=light
-```
-
+```bash
 You should also set the following with [sysctl](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl) to [accomodate the large number of guard pages created by hardened_malloc](https://github.com/GrapheneOS/hardened_malloc#traditional-linux-based-operating-systems):
 
-```
+```bash
 vm.max_map_count=1048576
-```
-
+```bash
 [The Whonix project provides a hardened_malloc package for Debian-based distributions](https://www.whonix.org/wiki/Hardened_Malloc).
 
 ## [6. Hardened compilation flags](https://madaidans-insecurities.github.io/guides/linux-hardening.html#hardened-compilation-flags)
@@ -859,54 +801,48 @@ The file, `/etc/securetty` specifies where you are allowed to login as root from
 
 `su` lets you switch users from a terminal. By default, it tries to login as root. To restrict the use of `su` to users within the `wheel` group, edit `/etc/pam.d/su` and `/etc/pam.d/su-l` and add:
 
-```
+```bash
 auth required pam_wheel.so use_uid
-```
-
+```bash
 You should have as little users in the `wheel` group as possible.
 
 ### [8.3 Locking the root account](https://madaidans-insecurities.github.io/guides/linux-hardening.html#locking-root)
 
 To lock the root account to prevent anyone from ever logging in as root, execute:
 
-```
+```bash
 passwd -l root
-```
-
+```bash
 Make sure that you have an alternative method of gaining root (such as booting from a live USB and chrooting into the filesystem) before doing this so you do not inadvertently lock yourself out of the system.
 
 ### [8.4 Denying root login via SSH](https://madaidans-insecurities.github.io/guides/linux-hardening.html#denying-ssh-root-login)
 
 To prevent someone from logging in as root via SSH, edit `/etc/ssh/sshd_config` and add:
 
-```
+```bash
 PermitRootLogin no
-```
-
+```bash
 ### [8.5 Increasing the number of hashing rounds](https://madaidans-insecurities.github.io/guides/linux-hardening.html#increase-hashing-rounds)
 
 You can increase the number of hashing rounds that shadow uses, thereby increasing the security of your hashed passwords by forcing an attacker to compute substantially more hashes to crack your password. By default, shadow uses 5000 rounds, but you can increase this to as many as you want. Although the more rounds you configure, the slower it will be to login. Edit `/etc/pam.d/passwd` and add the rounds option. For example:
 
-```
+```bash
 password required pam_unix.so sha512 shadow nullok rounds=65536
-```
-
+```bash
 This makes shadow perform 65536 rounds.
 
 Your passwords are not automatically rehashed after applying this setting, so you need to reset the password with:
 
-```
+```bash
 passwd $username
-```
-
+```bash
 ### [8.6 Restricting Xorg root access](https://madaidans-insecurities.github.io/guides/linux-hardening.html#restricting-xorg)
 
 Certain distributions run Xorg as the root user by default. This is an issue because Xorg contains a massive amount of ancient, complicated code, which adds huge attack surface and makes it more likely to have exploits that can gain root privileges. To stop it from being executed as root, edit `/etc/X11/Xwrapper.config` and add:
 
-```
+```bash
 needs_root_rights = no
-```
-
+```bash
 [Alternatively, just switch to Wayland](https://madaidans-insecurities.github.io/guides/linux-hardening.html#gui-isolation).
 
 ### [8.7 Accessing root securely](https://madaidans-insecurities.github.io/guides/linux-hardening.html#accessing-root-securely)
@@ -915,36 +851,31 @@ There are a [wide range of methods that malware can use to sniff the password of
 
 You must not use your ordinary user account to access root, as it may have been compromised. You also must not log directly into the root account. Create a separate "admin" user account that is used solely for accessing root and nothing else by executing:
 
-```
+```bash
 useradd admin
-```
-
+```bash
 Set a very strong password by executing:
 
-```
+```bash
 passwd admin
-```
-
+```bash
 Allow _only_ this account to use your preferred mechanism of escalating privileges. For example, if using `sudo`, add a sudoers exception by executing:
 
-```
+```bash
 visudo -f /etc/sudoers.d/admin-account
-```
-
+```bash
 Now enter:
 
-```
+```bash
 admin ALL=(ALL) ALL
-```
-
+```bash
 Make sure that no other account has access to `sudo` (or your preferred mechanism).
 
 Now, to actually login to this account, reboot first — this prevents, for example, a compromised window manager from performing [login spoofing](https://en.wikipedia.org/wiki/Login_spoofing). When provided with a login prompt, activate the [secure attention key](https://www.kernel.org/doc/Documentation/SAK.txt) by pressing the following combination of keys on your keyboard:
 
-```
+```bash
 Alt + SysRq + k
-```
-
+```bash
 This will kill all applications on the current virtual console, therefore defeating login spoofing attacks. Now, you can safely login to your admin account and perform tasks using root. Once you are finished, log out of the admin account and log back in to your unprivileged user account.
 
 ## [9. Firewalls](https://madaidans-insecurities.github.io/guides/linux-hardening.html#firewalls)
@@ -953,7 +884,7 @@ Firewalls can control incoming and outgoing network traffic and can be used to b
 
 This is an example of a basic iptables configuration that disallows all incoming network traffic:
 
-```
+```bash
 *filter
 :INPUT DROP [0:0]
 :FORWARD DROP [0:0]
@@ -969,8 +900,7 @@ This is an example of a basic iptables configuration that disallows all incoming
 -A INPUT -p tcp -j REJECT --reject-with tcp-reset
 -A INPUT -j REJECT --reject-with icmp-proto-unreachable
 COMMIT
-```
-
+```bash
 You should not attempt to use this example on your actual system though. It is only suitable for certain desktop systems.
 
 ## [10. Identifiers](https://madaidans-insecurities.github.io/guides/linux-hardening.html#identifiers)
@@ -989,10 +919,9 @@ If possible, your timezone should be set to "UTC" and your locale and keymap to 
 
 A [unique Machine ID](https://www.man7.org/linux/man-pages/man5/machine-id.5.html) is stored in `/var/lib/dbus/machine-id` and on systemd systems, `/etc/machine-id` also. These should be edited to something generic, such as [the Whonix ID](https://github.com/Whonix/dist-base-files/blob/master/etc/machine-id):
 
-```
+```bash
 b08dfa6083e7567a1921a715000001fb
-```
-
+```bash
 ### [10.4 MAC address spoofing](https://madaidans-insecurities.github.io/guides/linux-hardening.html#mac-address-spoofing)
 
 [MAC addresses](https://en.wikipedia.org/wiki/MAC_address) are unique identifiers assigned to network interface controllers (NICs). Every time you connect to a network (e.g. WiFi or ethernet), your MAC address is exposed. This allows people to use it to track you and uniquely identify you on the local network.
@@ -1003,19 +932,17 @@ The end of the MAC address identifies your specific device and is what can be us
 
 To spoof these addresses, first find out your network interface name by executing:
 
-```
+```bash
 ip a
-```
-
+```bash
 Next, install [macchanger](https://github.com/alobbs/macchanger) and execute:
 
-```
+```bash
 macchanger -e $network_interface
-```
-
+```bash
 To randomise the MAC address upon each boot, you should create an init script for your particular init system. This is an example of one for systemd:
 
-```
+```bash
 [Unit]
 Description=macchanger on eth0
 Wants=network-pre.target
@@ -1029,8 +956,7 @@ Type=oneshot
 
 [Install]
 WantedBy=multi-user.target
-```
-
+```bash
 The above example spoofs the MAC address of the `eth0` interface at boot. Replace `eth0` with your network interface.
 
 ### [10.5 Time attacks](https://madaidans-insecurities.github.io/guides/linux-hardening.html#time-attacks)
@@ -1045,10 +971,9 @@ Nearly every system has a different time; this can be used for [clock skew finge
 
 [TCP timestamps also leak the system time](https://web.archive.org/web/20170201160732/https://mailman.boum.org/pipermail/tails-dev/2013-December/004520.html). The kernel attempted to fix this by [using a random offset for each connection](https://github.com/torvalds/linux/commit/95a22caee396cef0bb2ca8fafdd82966a49367bb), but this is [not enough to fix the issue](https://forums.whonix.org/t/do-ntp-and-tcp-timestamps-really-leak-your-local-time/7824/10). Thus, TCP timestamps should be disabled. This can be done by setting the following with [sysctl](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl):
 
-```
+```bash
 net.ipv4.tcp_timestamps=0
-```
-
+```bash
 #### [10.5.3 TCP initial sequence numbers](https://madaidans-insecurities.github.io/guides/linux-hardening.html#tcp-isns)
 
 [TCP initial sequence numbers (ISNs) are another method of leaking the system time](https://bitguard.wordpress.com/2019/09/03/an-analysis-of-tcp-secure-sn-generation-in-linux-and-its-privacy-issues/). To mitigate this, you must install the [tirdad kernel module](https://github.com/0xsirus/tirdad), which generates random ISNs for connections.
@@ -1073,16 +998,14 @@ This form of tracking must not be confused with [stylometry](https://en.wikipedi
 
 By default, the permissions of files are quite permissive. You should search across your system for files and directories with improper permissions and restrict them. For example, on some distributions, such as Debian, users' home directories are world-readable. This can be restricted by executing:
 
-```
+```bash
 chmod 700 /home/$user
-```
-
+```bash
 A few more examples are `/boot`, `/usr/src` and `/{,usr/}lib/modules` — these contain the kernel image, System.map and various other files, all of which [can leak sensitive information about the kernel](https://madaidans-insecurities.github.io/guides/linux-hardening.html#other-kernel-pointer-leaks). To restrict access to these, execute:
 
-```
+```bash
 chmod 700 /boot /usr/src /lib/modules /usr/lib/modules
-```
-
+```bash
 On Debian-based distributions, the file permissions must be reserved with [dpkg-statoverride](https://manpages.debian.org/buster/dpkg/dpkg-statoverride.1.en.html). Otherwise, they will be overwritten during an update.
 
 Whonix's [SUID Disabler and Permission Hardener](https://www.whonix.org/wiki/SUID_Disabler_and_Permission_Hardener) applies the steps detailed in this section automatically.
@@ -1091,44 +1014,38 @@ Whonix's [SUID Disabler and Permission Hardener](https://www.whonix.org/wiki/SUI
 
 setuid / SUID allows a user to execute a binary with the privileges of the binary's owner. This is often used to allow unprivileged users to utilise certain functionality that is normally only reserved for the root user. As such, many SUID binaries have a history of privilege escalation security vulnerabilities. setgid / SGID is similar but for groups rather than users. To find all binaries on the system with the setuid or setgid bit, execute:
 
-```
+```bash
 find / -type f \( -perm -4000 -o -perm -2000 \)
-```
-
+```bash
 You should then remove any unnecessary setuid / setgid bits on programs you don't use, or replace them with [capabilities](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities).
 
 To remove the setuid bit, execute:
 
-```
+```bash
 chmod u-s $path_to_program
-```
-
+```bash
 To remove the setgid bit, execute:
 
-```
+```bash
 chmod g-s $path_to_program
-```
-
+```bash
 To add a capability to the file instead, execute:
 
-```
+```bash
 setcap $capability+ep $path_to_program
-```
-
+```bash
 To remove an unnecessary capability, execute:
 
-```
+```bash
 setcap -r $path_to_program
-```
-
+```bash
 ### [11.2 umask](https://madaidans-insecurities.github.io/guides/linux-hardening.html#umask)
 
 umask sets the default file permissions for newly created files. The default umask is `0022`, which is not very secure, as this gives read access to every user on the system for newly created files. To make new files unreadable by anyone other than the owner, edit `/etc/profile` and add:
 
-```
+```bash
 umask 0077
-```
-
+```bash
 ## [12. Core dumps](https://madaidans-insecurities.github.io/guides/linux-hardening.html#core-dumps)
 
 [Core dumps](https://en.wikipedia.org/wiki/Core_dump) contain the recorded memory of a program at a specific time, usually when that program has crashed. These can contain sensitive information, such as passwords and encryption keys, so these must be disabled.
@@ -1139,60 +1056,53 @@ There are three main ways to disable them: sysctl, systemd and ulimit.
 
 Set the following setting via [sysctl](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl):
 
-```
+```bash
 kernel.core_pattern=|/bin/false
-```
-
+```bash
 ### [12.2 systemd](https://madaidans-insecurities.github.io/guides/linux-hardening.html#core-dumps-systemd)
 
 Create `/etc/systemd/coredump.conf.d/disable.conf` and add:
 
-```
+```bash
 [Coredump]
 Storage=none
-```
-
+```bash
 ### [12.3 ulimit](https://madaidans-insecurities.github.io/guides/linux-hardening.html#core-dumps-ulimit)
 
 Edit `/etc/security/limits.conf` and add:
 
-```
-* hard core 0
-```
-
+```bash
+- hard core 0
+```bash
 ### [12.4 setuid processes](https://madaidans-insecurities.github.io/guides/linux-hardening.html#core-dumps-setuid)
 
 Process that run with elevated privileges may still dump their memory even after these settings. To prevent them from doing so, set the following via [sysctl](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl):
 
-```
+```bash
 fs.suid_dumpable=0
-```
-
+```bash
 ## [13. Swap](https://madaidans-insecurities.github.io/guides/linux-hardening.html#swap)
 
 Similar to [core dumps](https://madaidans-insecurities.github.io/guides/linux-hardening.html#core-dumps), [swapping or paging](https://en.wikipedia.org/wiki/Paging) copies parts of memory to disk, which can contain sensitive information. The kernel should be configured to only swap if absolutely necessary with this [sysctl](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl):
 
-```
+```bash
 vm.swappiness=1
-```
-
+```bash
 ## [14. PAM](https://madaidans-insecurities.github.io/guides/linux-hardening.html#pam)
 
 [PAM](http://www.linux-pam.org/) is a framework for user authentication — it's what you use when you login. You can make it more secure by requiring strong passwords or enforcing delays upon failed login attempts.
 
 To enforce strong passwords, you can use [pam_pwquality](https://linux.die.net/man/8/pam_pwquality). It enforces a configurable policy for passwords. For example, if you want passwords to contain a minimum of 16 characters (minlen), at least 6 different characters from the old password (difok), at least 3 digits (dcredit), at least 2 uppercase (ucredit), at least 2 lowercase (lcredit) and at least 3 other characters (ocredit), then edit `/etc/pam.d/passwd` and add:
 
-```
+```bash
 password required pam_pwquality.so retry=2 minlen=16 difok=6 dcredit=-3 ucredit=-2 lcredit=-2 ocredit=-3 enforce_for_root
 password required pam_unix.so use_authtok sha512 shadow
-```
-
+```bash
 To enforce delays, you can use [pam_faildelay](https://www.man7.org/linux/man-pages/man8/pam_faildelay.8.html). To add a delay of at least 4 seconds between failed login attempts to deter bruteforcing attempts, edit `/etc/pam.d/system-login` and add:
 
-```
+```bash
 auth optional pam_faildelay.so delay=4000000
-```
-
+```bash
 "4000000" being 4 seconds in microseconds.
 
 ## [15. Microcode updates](https://madaidans-insecurities.github.io/guides/linux-hardening.html#microcode)
@@ -1205,29 +1115,26 @@ Microcode updates are essential to fix critical CPU vulnerabilities, such as [Me
 
 To enable these, set the following settings via [sysctl](https://madaidans-insecurities.github.io/guides/linux-hardening.html#sysctl):
 
-```
+```bash
 net.ipv6.conf.all.use_tempaddr=2
 net.ipv6.conf.default.use_tempaddr=2
-```
-
+```bash
 ### [16.1 NetworkManager](https://madaidans-insecurities.github.io/guides/linux-hardening.html#ipv6-networkmanager)
 
 To enable [privacy extensions for NetworkManager](https://blogs.gnome.org/lkundrak/2015/12/03/networkmanager-and-privacy-in-the-ipv6-internet/), edit `/etc/NetworkManager/NetworkManager.conf` and add:
 
-```
+```bash
 [connection]
 ipv6.ip6-privacy=2
-```
-
+```bash
 ### [16.2 systemd-networkd](https://madaidans-insecurities.github.io/guides/linux-hardening.html#ipv6-systemd-networkd)
 
 To enable [privacy extensions for systemd-networkd](https://www.freedesktop.org/software/systemd/man/systemd.network.html#IPv6PrivacyExtensions=), create `/etc/systemd/network/ipv6-privacy.conf` and add:
 
-```
+```bash
 [Network]
 IPv6PrivacyExtensions=kernel
-```
-
+```bash
 ## [17. Partitioning and mount options](https://madaidans-insecurities.github.io/guides/linux-hardening.html#partitioning)
 
 File systems should be separated into various partitions to gain fine-grained control over their permissions. Different mount options can be added to restrict what can be done:
@@ -1238,14 +1145,13 @@ File systems should be separated into various partitions to gain fine-grained co
 
 These mount options should be set wherever possible in `/etc/fstab`. If you cannot use separate partitions, then create bind mounts. An example of a more secure `/etc/fstab`:
 
-```
+```bash
 /        /          ext4    defaults                              1 1
 /home    /home      ext4    defaults,nosuid,noexec,nodev          1 2
 /tmp     /tmp       ext4    defaults,bind,nosuid,noexec,nodev     1 2
 /var     /var       ext4    defaults,bind,nosuid                  1 2
 /boot    /boot      ext4    defaults,nosuid,noexec,nodev          1 2
-```
-
+```bash
 Be aware that `noexec` can be [bypassed via shell scripts](https://chromium.googlesource.com/chromiumos/docs/+/master/security/noexec_shell_scripts.md).
 
 ## [18. Entropy](https://madaidans-insecurities.github.io/guides/linux-hardening.html#entropy)
@@ -1256,34 +1162,30 @@ Be aware that `noexec` can be [bypassed via shell scripts](https://chromium.goog
 
 For jitterentropy to work properly, the kernel module must be loaded as early as possible by creating `/usr/lib/modules-load.d/jitterentropy.conf` and adding:
 
-```
+```bash
 jitterentropy_rng
-```
-
+```bash
 ### [18.2 RDRAND](https://madaidans-insecurities.github.io/guides/linux-hardening.html#rdrand)
 
 [RDRAND](https://www.felixcloutier.com/x86/rdrand) is a CPU instruction for providing random numbers. It is automatically used by the kernel as an entropy source if it is available; but since it is proprietary and part of the CPU itself, it is impossible to audit and verify its security properties. You are not even able to reverse engineer the code if you wish. This RNG has [suffered](https://en.wikipedia.org/wiki/RDRAND#Reception) [from](https://arstechnica.com/gadgets/2019/10/how-a-months-old-amd-microcode-bug-destroyed-my-weekend/) [vulnerabilities](https://twitter.com/RichFelker/status/1125794261839032320) [before](https://twitter.com/pid_eins/status/1149649806056280069) and often has a weak implementation. It is possible to distrust this feature by [setting the following boot parameter](https://madaidans-insecurities.github.io/guides/linux-hardening.html#boot-parameters):
 
-```
+```bash
 random.trust_cpu=off
-```
-
+```bash
 ## [19. Editing files as root](https://madaidans-insecurities.github.io/guides/linux-hardening.html#editing-as-root)
 
 It is unrecommended to run ordinary text editors as root. Most text editors can do much more than simply edit text files, and this can be exploited. For example, open `vi` as root and enter `:sh`. You now have a root shell with access to your entire system, which an attacker can easily exploit.
 
 A solution to this is using `sudoedit`. This copies the file to a temporary location, opens the text editor as an ordinary user, edits the temporary file and overwrites the original file as root. This way, the actual editor doesn't run as root. To use `sudoedit`, execute:
 
-```
+```bash
 sudoedit $path_to_file
-```
-
+```bash
 By default, it uses `vi`, but the default editor can be switched via the `EDITOR` or `SUDO_EDITOR` environment variables. For example, to use `nano`, execute:
 
-```
+```bash
 EDITOR=nano sudoedit $path_to_file
-```
-
+```bash
 This environment variable can be set globally in `/etc/environment`.
 
 ## [20. Distribution-specific hardening](https://madaidans-insecurities.github.io/guides/linux-hardening.html#distro-specific)
@@ -1296,10 +1198,9 @@ Linux distributions often use HTTP or a mixture of HTTP and HTTPS mirrors by def
 
 Since Debian Buster, [the package manager, APT has supported optional seccomp-bpf filtering](https://www.debian.org/releases/buster/amd64/release-notes/ch-whats-new.en.html#apt-sandboxing). This restricts the syscalls that APT is allowed to execute, which can severely limit an attacker's ability to do harm to the system if they attempt to exploit a vulnerability in APT. To enable this, create `/etc/apt/apt.conf.d/40sandbox` and add:
 
-```
+```bash
 APT::Sandbox::Seccomp "true";
-```
-
+```bash
 ## [21. Physical security](https://madaidans-insecurities.github.io/guides/linux-hardening.html#physical-security)
 
 ### [21.1 Encryption](https://madaidans-insecurities.github.io/guides/linux-hardening.html#encryption)
@@ -1330,27 +1231,24 @@ Setting a bootloader password alone is not enough to fully protect it. You must 
 
 To set a password for GRUB, execute:
 
-```
+```bash
 grub-mkpasswd-pbkdf2
-```
-
+```bash
 Enter your password and a string will be generated from that password. It will be something like "grub.pbkdf2.sha512.10000.C4009...". Create `/etc/grub.d/40_password` and add:
 
-```
+```bash
 set superusers="$username"
 password_pbkdf2 $username $password
-```
-
+```bash
 Replace "$password" with the string generated by `grub-mkpasswd-pbkdf2`. "$username" will be for the superusers that are permitted to use the GRUB command line, edit menu entries, and execute any menu entry. For most people, this will just be "root".
 
 [Regenerate your configuration file](https://madaidans-insecurities.github.io/guides/linux-hardening.html#regenerate-grub-config) and GRUB will now be password protected.
 
 To restrict only editing the boot parameters and accessing the GRUB console whilst still allowing you to boot, edit `/boot/grub/grub.cfg` and next to "menuentry '$OSName'", add the "--unrestricted" parameter. For example:
 
-```
+```bash
 menuentry 'Arch Linux' --unrestricted
-```
-
+```bash
 You will need to regenerate your configuration file again to apply this change.
 
 #### [21.3.2 Syslinux](https://madaidans-insecurities.github.io/guides/linux-hardening.html#syslinux)
@@ -1359,16 +1257,14 @@ Syslinux can either set a master password or a menu password. A master password 
 
 To set a master password for Syslinux, edit `/boot/syslinux/syslinux.cfg` and add:
 
-```
+```bash
 MENU MASTER PASSWD $password
-```
-
+```bash
 To set a menu password, edit `/boot/syslinux/syslinux.cfg` and within a label that has the item you want to password protect, add:
 
-```
+```bash
 MENU PASSWD $password
-```
-
+```bash
 Replace "$password" with the password you wish to set.
 
 These passwords can either be plaintext or hashed with MD5, SHA-1, SHA-256 or SHA-512. It is recommended that you hash your password with a strong hashing algorithim like SHA-256 or SHA-512 first to avoid storing it in plaintext.
@@ -1377,10 +1273,9 @@ These passwords can either be plaintext or hashed with MD5, SHA-1, SHA-256 or SH
 
 systemd-boot has the option to prevent editing the kernel parameters at boot. In the `loader.conf` file, add:
 
-```
+```bash
 editor no
-```
-
+```bash
 systemd-boot does not officially support password protecting the kernel parameters editor, but you can achieve this with [systemd-boot-password](https://github.com/kitsunyan/systemd-boot-password).
 
 ### [21.4 Verified boot](https://madaidans-insecurities.github.io/guides/linux-hardening.html#verified-boot)
@@ -1406,25 +1301,22 @@ You could also use `nousb` as a [kernel boot parameter](https://madaidans-insecu
 
 To enable the IOMMU, set the following [kernel boot parameters](https://madaidans-insecurities.github.io/guides/linux-hardening.html#boot-parameters):
 
-```
+```bash
 intel_iommu=on amd_iommu=on
-```
-
+```bash
 You only need to enable the option for your specific CPU manufacturer, but there are no issues with enabling both options.
 
-```
+```bash
 efi=disable_early_pci_dma
-```
-
+```bash
 This option [fixes a hole in the above IOMMU](https://mjg59.dreamwidth.org/54433.html) by disabling the busmaster bit on all PCI bridges during very early boot.
 
 Furthermore, [Thunderbolt](<https://en.wikipedia.org/wiki/Thunderbolt_(interface)#Security_vulnerabilities>) and [FireWire](https://en.wikipedia.org/wiki/IEEE_1394#Security_issues) are often vulnerable to DMA attacks. To disable them, [blacklist these kernel modules](https://madaidans-insecurities.github.io/guides/linux-hardening.html#kasr-kernel-modules):
 
-```
+```bash
 install firewire-core /bin/false
 install thunderbolt /bin/false
-```
-
+```bash
 ### [21.7 Cold boot attacks](https://madaidans-insecurities.github.io/guides/linux-hardening.html#cold-boot-attacks)
 
 A [cold boot attack](https://en.wikipedia.org/wiki/Cold_boot_attack) occurs when an attacker analyses the data in RAM before it is erased. When using modern RAM, cold boot attacks aren't very practical, as RAM usually clears within a few seconds or minutes unless it has been placed inside a cooling solution, such as liquid nitrogen or a freezer. An attacker would have to rip out the RAM sticks from your device and expose it to liquid nitrogen all within a few seconds and without the user noticing.
@@ -1466,18 +1358,16 @@ You should perform as much varied research as possible and not rely on a single 
 
 You may need to regenerate your GRUB configuration to apply certain changes you have made to the bootloader. The steps to do this can sometimes differ between different distributions. For example, on distributions such as Arch Linux, you are expected to regenerate your configuration file by executing:
 
-```
+```bash
 grub-mkconfig -o $path_to_grub_config
-```
-
+```bash
 "$path_to_grub_config" depends on how you have setup your system. It is often either `/boot/grub/grub.cfg` or `/boot/EFI/grub/grub.cfg`, but you should make sure before executing this command.
 
 Alternatively, on distributions like Debian or Ubuntu, you should execute:
 
-```
+```bash
 update-grub
-```
-
+```bash
 ### [Capabilities](https://madaidans-insecurities.github.io/guides/linux-hardening.html#capabilities)
 
 In the Linux kernel, "root privileges" are split up into various different [capabilities](https://man7.org/linux/man-pages/man7/capabilities.7.html). This is helpful in applying the [principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege) — instead of giving a process total root privileges, you can grant them only a specific subset instead. For example, if a program simply needs to set your system time, then it only needs `CAP_SYS_TIME` rather than total root. This could limit the potential damage that can be done; however, you must still be cautious with granting capabilities, as [many of them can be abused to gain full root privileges anyway](https://forums.grsecurity.net/viewtopic.php?t=2522).

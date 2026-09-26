@@ -38,8 +38,7 @@ $ free -h
               total        used        free      shared  buff/cache   available
 Mem:           7.8G        1.2G        627M         85M        6.0G        6.0G
 Swap:            0B          0B          0B
-```
-
+```bash
 上图中总内存与可用内存差值出现不一致性，是因为 OS 发现系统的物理内存有大量剩余时，为了提高 IO 的性能，就会使用多余的内存当做文件缓存。
 
 ## CPU 利用率详解
@@ -54,8 +53,7 @@ cpu2 29208 1397 19750 119100548 462 0 328 0 0 0
 cpu3 34711 258 15045 119083615 560 0 374 0 0 0
 
      (us)  (ni)    (sy)     (id)      (wa)   (hi)  (si)  (st) (guest) (guest_nice)
-```
-
+```bash
 对于 CPU 利用率描述，Linux man-pages 用的都是 time（time running，time spent，time stolen）这个单词。这里的统计数据，其实就是 CPU 从系统启动至当前，各项（us, sy, ni, id, wa, hi, si, st）占用的时间，单位是 jiffies。通过 sysconf(\_SC_CLK_TCK) 可以获得 1 秒被分成多少个 jiffies。一般是 100，即 1 jiffies == 0.01 s。
 
 计算 CPU 使用率的基本原理就是从 /proc/stat 进行采样和计算。最简单的方法，一秒采样一次 /proc/stat，如：
@@ -77,6 +75,5 @@ $ iperf -s -i 1  # 服务端
 $ iperf -c 192.168.1.4 -i 1 -t 60 # 客户端，可以开几个 terminal 执行多个客户端，这样 si 的变化才会比较明显
 
 %Cpu(s):  1.7 us, 74.1 sy,  0.0 ni,  8.0 id,  0.0 wa,  0.0 hi, 16.2 si,  0.0 st
-```
-
+```bash
 st 和虚拟化相关，利用虚拟化技术，一台 32 CPU 核心的物理机，可以创建出几十上百个单 CPU 核心的虚拟机。这在公有云场景下，简称“超卖”。大部分情况下，物理服务器的资源有大量是闲置的。此时，“超卖”并不会造成明显影响。当很多虚拟机的 CPU 压力变大，此时物理机的资源明显不足，就会造成各个虚拟机之间相互竞争、相互等待。st 就是用来衡量被 Hypervisor “偷去” 给其它虚拟机使用的 CPU。这个值越高，说明这台物理服务器的资源竞争越激烈。

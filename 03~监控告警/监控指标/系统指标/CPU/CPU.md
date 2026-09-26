@@ -31,8 +31,7 @@ $ ps -aeo pcpu,user,pid,cmd | sort -nr | head -10
 
 # 显示系统整体的 CPU利用率和闲置率
 $ grep "cpu " /proc/stat | awk -F ' ' '{total = $2 + $3 + $4 + $5} END {print "idle \t used\n" $5*100/total "% " $2*100/total "%"}'
-```
-
+```bash
 ## CPU 利用率高 & 平均负载高
 
 这种情况常见于 CPU 密集型的应用，大量的线程处于可运行状态，I/O 很少，常见的大量消耗 CPU 资源的应用场景有：
